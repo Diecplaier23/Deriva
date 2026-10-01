@@ -17,7 +17,7 @@ function updateMarginLabels() {
 
 function renderSummary() {
   const summary = getBudgetSummary();
-  const { totals, available, costPerPerson, progress, isBudgetCovered, statusText } = summary;
+  const { totals, available, balance, costPerPerson, progress, isBudgetCovered, statusText } = summary;
   const budgetStatus = $("budgetStatus");
   budgetStatus.hidden = !statusText;
   budgetStatus.classList.toggle("is-covered", isBudgetCovered);
@@ -31,27 +31,23 @@ function renderSummary() {
   $("budgetProgress").parentElement.setAttribute("aria-valuenow", String(Math.round(progress)));
   const peopleSummary = $("summaryPeople");
   peopleSummary.replaceChildren();
-  $("summaryPeopleTitle").textContent = state.calculationMode === "automatic"
-    ? "Reparto estimado por persona y ahorros"
-    : "Aportaciones y ahorros";
+  $("summaryPeopleTitle").textContent = "Coste pendiente por persona y saldo restante";
   state.people.forEach((person, index) => {
     const row = document.createElement("div");
     row.className = "summary-person";
     const name = document.createElement("span");
     name.textContent = person.name.trim() || `Persona ${index + 1}`;
     const amount = document.createElement("strong");
-    amount.textContent = money.format(state.calculationMode === "automatic"
-      ? costPerPerson
-      : Number(person.contribution) || 0);
+    amount.textContent = money.format(costPerPerson);
     row.append(name, amount);
     peopleSummary.append(row);
   });
   const savingsRow = document.createElement("div");
   savingsRow.className = "summary-person";
   const savingsLabel = document.createElement("span");
-  savingsLabel.textContent = "Ahorros generales";
+  savingsLabel.textContent = "Saldo tras gastos";
   const savingsAmount = document.createElement("strong");
-  savingsAmount.textContent = money.format(Number(state.savings) || 0);
+  savingsAmount.textContent = money.format(balance);
   savingsRow.append(savingsLabel, savingsAmount);
   peopleSummary.append(savingsRow);
   $("contributionTotal").textContent = state.calculationMode === "automatic"

@@ -23,6 +23,10 @@ export function getAvailable() {
   return contributions + (Number(state.savings) || 0);
 }
 
+export function getRemainingCost(total, availableFunds = Number(state.savings) || 0) {
+  return Math.max(0, total - availableFunds);
+}
+
 export function getExpenseMath(expense) {
   const enteredTotal = Number(expense.price) * (expense.scope === "person" ? participantCount() : 1);
   const margin = expense.confirmed ? 0 : enteredTotal * (state.safetyMargin / 100);
@@ -39,6 +43,7 @@ export function getBudgetSummary() {
   }, { confirmed: 0, unconfirmed: 0, total: 0 });
   const available = getAvailable();
   const difference = totals.total - available;
+  const balance = available - totals.total;
   const isBudgetCovered = difference <= 0;
   const statusText = state.calculationMode === "manual" && totals.total > 0
     ? isBudgetCovered ? "Presupuesto bajo control" : `Falta por aportar ${money.format(difference)}`
@@ -47,7 +52,8 @@ export function getBudgetSummary() {
     totals,
     available,
     difference,
-    costPerPerson: totals.total / participantCount(),
+    balance,
+    costPerPerson: Math.max(0, difference) / participantCount(),
     progress: totals.total > 0 ? Math.min(100, (available / totals.total) * 100) : 0,
     isBudgetCovered,
     statusText

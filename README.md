@@ -55,7 +55,7 @@ Cada gasto puede marcarse como confirmado, editarse o eliminarse. Los gastos no 
 
 ## Resumen y cálculos
 
-El resumen se actualiza al cambiar los datos. El presupuesto suma el precio de cada gasto y el margen aplicable. El coste por persona se calcula dividiendo ese presupuesto entre el número de viajeros. El dinero disponible suma los ahorros generales y, solo en el modo manual, las aportaciones individuales.
+El resumen se actualiza al cambiar los datos. El presupuesto suma el precio de cada gasto y el margen aplicable. El saldo tras gastos es el dinero disponible menos el presupuesto: suma los ahorros generales y, solo en el modo manual, las aportaciones individuales. Si queda saldo positivo, el coste pendiente por persona es cero; si queda un déficit, se reparte a partes iguales entre los viajeros. El campo de ahorros conserva el importe inicial y el saldo del resumen se recalcula al cambiar los gastos.
 
 El indicador de dinero disponible muestra el progreso frente al presupuesto. En el modo manual, si hay gastos registrados, Deriva muestra la cantidad pendiente de aportar o indica que el presupuesto está bajo control si el dinero disponible cubre los gastos.
 
@@ -63,7 +63,7 @@ El botón **Descargar** genera una imagen PNG llamada `deriva-resumen.png` con l
 
 ## Repartir un coste
 
-La sección **¿Ya conoces el coste?** sirve para dividir un importe total a partes iguales entre los viajeros. Permite escribir o cambiar sus nombres y marcar quién ha pagado. Es un cálculo informativo independiente: no crea un gasto en el presupuesto del viaje.
+La sección **¿Ya conoces el coste?** sirve para dividir un importe total a partes iguales entre los viajeros, descontando primero el saldo positivo que quede tras los gastos del viaje. Permite escribir o cambiar sus nombres y marcar quién ha pagado. Es un cálculo informativo independiente: no crea un gasto en el presupuesto del viaje.
 
 ## Guardado y privacidad
 

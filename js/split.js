@@ -1,5 +1,5 @@
 import { $ } from "./dom.js";
-import { money, participantCount } from "./calculations.js";
+import { getBudgetSummary, getRemainingCost, money, participantCount } from "./calculations.js";
 import { syncPersonName } from "./people.js";
 import { saveState } from "./storage.js";
 import { state } from "./state.js";
@@ -13,16 +13,17 @@ export function initializeSplit({ renderApp }) {
 
 export function updateSplitCalculator() {
   const total = $("splitTotal").value;
+  const remainingFunds = Math.max(0, getBudgetSummary().balance);
   $("splitPerPerson").textContent = total === "" || !Number.isFinite(Number(total))
     ? "—"
-    : money.format(Number(total) / participantCount());
-  renderSplitPeople(total);
+    : money.format(getRemainingCost(Number(total), remainingFunds) / participantCount());
+  renderSplitPeople(total, remainingFunds);
 }
 
-function renderSplitPeople(total = $("splitTotal").value) {
+function renderSplitPeople(total = $("splitTotal").value, remainingFunds = Math.max(0, getBudgetSummary().balance)) {
   const count = participantCount();
   const validTotal = total !== "" && Number.isFinite(Number(total));
-  const perPerson = validTotal ? money.format(Number(total) / count) : "—";
+  const perPerson = validTotal ? money.format(getRemainingCost(Number(total), remainingFunds) / count) : "—";
   $("splitPeopleCount").textContent = `${count} ${count === 1 ? "persona" : "personas"}`;
   const list = $("splitPeopleList");
   list.replaceChildren();
