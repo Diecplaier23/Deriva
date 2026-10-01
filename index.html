@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f3">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23176b56'/%3E%3Cpath d='M10 22L22 10M12 10h10v10' fill='none' stroke='white' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <title>Deriva</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Deriva, inicio">
+      <span class="brand-mark" aria-hidden="true">↗</span>
+      Deriva
+    </a>
+    <div class="topbar-actions">
+      <div class="topbar-note"><span aria-hidden="true"></span> Tu viaje, bajo tu control</div>
+      <button class="reset-button" id="resetAllButton" type="button">Reiniciar todo</button>
+    </div>
+  </header>
+
+  <main>
+    <nav class="mode-menu" aria-label="Secciones de Deriva">
+      <button class="active" id="budgetModeButton" type="button" aria-pressed="true">Mi viaje</button>
+      <button id="splitModeButton" type="button" aria-pressed="false">¿Ya conoces el coste?</button>
+    </nav>
+
+    <section class="intro" id="mainIntro">
+      <div>
+        <p class="eyebrow">Tú pones los datos. Deriva pone orden.</p>
+        <h1>Tu viaje, a tu manera</h1>
+        <p class="intro-copy">Añade lo que ya sabes y completa el presupuesto poco a poco. Tú decides cuánto cuesta cada cosa; Deriva hace las cuentas.</p>
+      </div>
+    </section>
+
+    <div class="layout" id="budgetView">
+      <div class="main-column">
+        <section class="card">
+          <div class="card-body">
+            <div class="section-heading">
+              <h2 class="section-title">Tu viaje</h2>
+              <span class="step-label">Datos básicos</span>
+            </div>
+            <div class="field-grid trip-fields">
+              <label class="field full">
+                <span class="field-label">Destino <span class="optional-label">(opcional)</span></span>
+                <span class="input-wrap"><input id="destination" type="text" maxlength="80" placeholder="¿A dónde vas?"></span>
+              </label>
+              <label class="field full">
+                <span class="field-label">Ahorros <span class="optional-label">(opcional)</span></span>
+                <span class="input-wrap"><input id="savings" type="number" min="0" step="0.01" inputmode="decimal" placeholder="¿Tienes ya ahorrado?"></span>
+                <small class="helper savings-helper" id="savingsHelper">Saldo general disponible para el viaje.</small>
+              </label>
+              <label class="field full">
+                <span class="field-label">Margen de seguridad</span>
+                <span class="input-wrap"><input id="safetyMargin" type="number" min="0" max="100" step="0.1" inputmode="decimal" aria-describedby="safetyMarginHelper"><span class="input-suffix">%</span></span>
+                <small class="helper" id="safetyMarginHelper">Se añade a los gastos no confirmados. Por defecto, 10 %.</small>
+              </label>
+            </div>
+            <div class="calculation-mode" role="group" aria-label="Modo de cálculo del presupuesto">
+              <button class="active" id="automaticModeButton" type="button" aria-pressed="true">División automática</button>
+              <button id="manualModeButton" type="button" aria-pressed="false">Aportaciones manuales</button>
+            </div>
+            <div class="contribution-heading"><strong><span id="peopleSectionTitle">Personas del viaje</span> <span class="people-count" id="peopleCountLabel">1 persona</span></strong><span class="contribution-total" id="contributionTotal">0 € por persona</span><button class="add-person-button" id="addPersonButton" type="button"><span aria-hidden="true">+</span> Añadir persona</button></div>
+            <div class="contribution-list" id="contributionList"></div>
+            <small class="helper" id="contributionHelper">El presupuesto total se divide a partes iguales entre todas las personas.</small>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-body">
+            <div class="section-heading">
+              <div><h2 class="section-title">Gastos del viaje</h2><span class="step-label">Añade y organiza a tu ritmo</span></div>
+              <button class="add-expense-button" id="addExpenseButton" type="button"><span aria-hidden="true">+</span> Añadir gasto</button>
+            </div>
+            <div id="expenseList" aria-live="polite"></div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="side-column" aria-label="Resumen del presupuesto">
+        <section class="card summary-card">
+          <div class="card-body">
+            <div class="section-heading">
+              <h2 class="section-title">Resumen del viaje</h2>
+              <div class="summary-heading-tools">
+                <span class="step-label">En tiempo real</span>
+                <button class="summary-download-button" id="downloadSummaryButton" type="button" title="Descargar el resumen como imagen"><span aria-hidden="true">↓</span> Descargar</button>
+              </div>
+            </div>
+            <div class="summary-metrics" aria-live="polite">
+              <div class="summary-metric primary"><span>Coste total presupuestado</span><strong id="totalBudget">0 €</strong></div>
+              <div class="summary-metric"><span>Gastos confirmados</span><strong id="confirmedTotal">0 €</strong></div>
+              <div class="summary-metric"><span>No confirmados, con margen</span><strong id="unconfirmedTotal">0 €</strong></div>
+              <div class="summary-metric"><span>Dinero disponible</span><strong id="availableTotal">0 €</strong></div>
+            </div>
+            <div class="budget-progress" role="progressbar" aria-label="Dinero disponible respecto al presupuesto" aria-valuemin="0" aria-valuemax="100"><span id="budgetProgress"></span></div>
+            <div class="budget-status" id="budgetStatus" aria-live="polite" hidden></div>
+            <div class="summary-people"><h3 id="summaryPeopleTitle">Reparto estimado por persona y ahorros</h3><div id="summaryPeople"></div></div>
+            <p class="safety-note">Los gastos no confirmados incluyen un margen de seguridad del <strong id="marginRateLabel">10 %</strong>. No es un precio añadido al servicio.</p>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <section class="split-view card" id="splitView" aria-labelledby="splitViewTitle" hidden>
+      <div class="card-body">
+        <div class="split-view-heading">
+          <div><h1 id="splitViewTitle">Repartir el coste</h1><p>Introduce el total y calcula cuánto corresponde a cada persona.</p></div>
+          <button class="back-budget-button" id="backToBudgetButton" type="button">← Mi viaje</button>
+        </div>
+        <div class="split-destination-field">
+          <label for="splitDestination">Destino <span class="optional-label">(opcional)</span>
+            <input id="splitDestination" type="text" maxlength="80" placeholder="¿A dónde vas?">
+          </label>
+        </div>
+        <div class="split-input-area">
+          <label for="splitTotal">Coste total
+            <input id="splitTotal" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Introduce el coste total">
+          </label>
+          <div class="split-result"><span>A cada persona</span><strong id="splitPerPerson">—</strong></div>
+        </div>
+        <div class="split-people-heading">
+          <div><strong>Personas en el reparto</strong><small id="splitPeopleCount">1 persona</small></div>
+          <button class="add-person-button" id="splitAddPersonButton" type="button"><span aria-hidden="true">+</span> Añadir persona</button>
+        </div>
+        <div class="split-people-list" id="splitPeopleList"></div>
+        <p class="split-note">El total se divide a partes iguales. Este cálculo es informativo y no añade un gasto al presupuesto.</p>
+      </div>
+    </section>
+    <p class="footer-note">Los importes los introduces tú. Deriva solo los organiza y calcula.</p>
+
+    <dialog class="expense-dialog" id="expenseDialog" aria-labelledby="dialogTitle">
+      <div class="dialog-body">
+        <div class="dialog-heading">
+          <div><h2 id="dialogTitle">¿Qué gasto quieres añadir?</h2><p>El precio siempre lo introduces tú.</p></div>
+          <button class="dialog-close" id="closeExpenseDialog" type="button" aria-label="Cerrar">×</button>
+        </div>
+        <form id="expenseForm">
+          <div id="categoryStep">
+            <div class="category-options" id="categoryOptions" role="listbox" aria-label="Categorías de gasto">
+              <div class="category-selected" id="selectedCategoryArea" hidden>
+                <h3 class="category-group-title" id="selectedCategoryGroup"></h3>
+                <button class="category-option is-selected" id="selectedCategoryButton" type="button" role="option" aria-selected="true"></button>
+              </div>
+              <div class="category-groups" id="categoryGroups"></div>
+            </div>
+          </div>
+          <div class="expense-form-fields" id="expenseFields" hidden>
+            <button id="changeCategory" type="button">Cambiar gasto</button>
+            <label>Descripción <span class="optional-label">(opcional)</span><input class="expense-input" id="expenseDescription" type="text" maxlength="100" placeholder="Un detalle para reconocerlo"></label>
+            <label>Precio que has encontrado<input class="expense-input" id="expensePrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0 €" required></label>
+            <fieldset class="scope-fieldset">
+              <legend>Gasto para:</legend>
+              <label class="scope-option"><input type="radio" name="expenseScope" value="group" checked> Todo el grupo</label>
+              <label class="scope-option"><input type="radio" name="expenseScope" value="person"> Por persona</label>
+            </fieldset>
+            <label class="confirm-option"><input id="expenseConfirmed" type="checkbox"> Gasto confirmado</label>
+            <p class="helper">Si no está confirmado, se añadirá un margen de seguridad del <span id="dialogMarginRate">10 %</span> al presupuesto.</p>
+          </div>
+          <p class="dialog-error" id="dialogError" role="alert" hidden></p>
+          <div class="dialog-actions"><button id="cancelExpense" type="button">Cancelar</button><button class="save-expense" id="saveExpense" type="submit" hidden>Guardar gasto</button></div>
+        </form>
+      </div>
+    </dialog>
+    <dialog class="expense-dialog reset-dialog" id="resetDialog" aria-labelledby="resetDialogTitle" aria-describedby="resetDialogDescription">
+      <div class="dialog-body">
+        <div class="dialog-heading">
+          <div><h2 id="resetDialogTitle">¿Reiniciar todo?</h2><p id="resetDialogDescription">Se eliminarán el destino, los ahorros, todas las personas y todos los gastos.</p></div>
+        </div>
+        <div class="dialog-actions">
+          <button id="cancelResetButton" type="button" autofocus>Cancelar</button>
+          <button class="reset-confirm-button" id="confirmResetButton" type="button">Reiniciar de todas formas</button>
+        </div>
+      </div>
+    </dialog>
+  </main>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
