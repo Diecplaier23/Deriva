@@ -43,7 +43,7 @@ export function getBudgetSummary() {
   }, { confirmed: 0, unconfirmed: 0, total: 0 });
   const available = getAvailable();
   const difference = totals.total - available;
-  const balance = available - totals.total;
+  const balance = Math.max(0, available - totals.total);
   const isBudgetCovered = difference <= 0;
   const statusText = state.calculationMode === "manual" && totals.total > 0
     ? isBudgetCovered ? "Presupuesto bajo control" : `Falta por aportar ${money.format(difference)}`
