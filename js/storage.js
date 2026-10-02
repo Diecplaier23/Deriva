@@ -1,4 +1,4 @@
-import { createInitialState, setState, state } from "./state.js";
+import { createInitialState, createPersonId, setState, state } from "./state.js";
 
 export const STORAGE_KEY = "rumbo-trip-budget";
 
@@ -7,6 +7,7 @@ export function loadState(categories) {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (!saved || !Array.isArray(saved.people) || !Array.isArray(saved.expenses)) return createInitialState();
     const people = saved.people.slice(0, 99).map((person) => ({
+      id: typeof person.id === "string" && person.id ? person.id : createPersonId(),
       name: typeof person.name === "string" ? person.name.slice(0, 50) : "",
       contribution: Number.isFinite(Number(person.contribution)) && Number(person.contribution) >= 0 ? String(person.contribution) : "",
       paid: Boolean(person.paid)
@@ -19,7 +20,11 @@ export function loadState(categories) {
       return {
         id: String(expense.id), category: category.group, type: category.name,
         description: typeof expense.description === "string" ? expense.description.slice(0, 100) : "",
-        price: Number(expense.price), scope: expense.scope === "person" ? "person" : "group",
+        price: Number(expense.price),
+        scope: expense.scope === "person" || expense.scope === "selected" ? expense.scope : "group",
+        selectedPeople: Array.isArray(expense.selectedPeople)
+          ? [...new Set(expense.selectedPeople.filter((personId) => typeof personId === "string" && people.some((person) => person.id === personId)))]
+          : [],
         confirmed: Boolean(expense.confirmed)
       };
     }).filter(Boolean);

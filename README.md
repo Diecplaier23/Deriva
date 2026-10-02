@@ -69,4 +69,4 @@ La sección **¿Ya conoces el coste?** sirve para dividir un importe total a par
 
 Los datos del viaje se guardan automáticamente en el almacenamiento local del navegador (`localStorage`). Permanecen en ese navegador y perfil; no se sincronizan con otros dispositivos ni se envían a un servidor. El botón **Reiniciar todo** pide confirmación y elimina el destino, los ahorros, el margen configurado, las personas, las aportaciones y los gastos guardados.
 
-Deriva no requiere una cuenta ni conexión a un servicio externo para realizar sus cálculos. Si se borra el almacenamiento del navegador, también se borrarán los datos guardados de la aplicación.
+Deriva no requiere una cuenta ni conexión a un servicio externo para realizar sus cálculos. Si se borra el almacenamiento del navegador, también se borrarán los datos guardados de la aplicación. Cambiar entre «Mi viaje» y «¿Ya conoces el coste?» reinicia ambas vistas y elimina los datos guardados para evitar mezclar sus importes.

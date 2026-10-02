@@ -9,7 +9,7 @@ async function downloadSummaryImage() {
   const scale = 2;
   const padding = 46;
   const capturedAt = new Intl.DateTimeFormat("es-ES", { dateStyle: "medium", timeStyle: "short" }).format(new Date());
-  const metrics = Array.from(document.querySelectorAll(".summary-card .summary-metric"), (row) => ({
+  const metrics = Array.from(document.querySelectorAll(".summary-card .summary-metric:not([hidden])"), (row) => ({
     label: row.querySelector("span").textContent.trim(),
     value: row.querySelector("strong").textContent.trim()
   }));
@@ -17,7 +17,7 @@ async function downloadSummaryImage() {
     name: row.querySelector("span").textContent.trim(),
     value: row.querySelector("strong").textContent.trim()
   }));
-  const safetyNote = document.querySelector(".safety-note").textContent.replace(/\s+/g, " ").trim();
+  const safetyNote = document.querySelector(".summary-card .safety-note:not([hidden])")?.textContent.replace(/\s+/g, " ").trim() || "";
   const metricStart = 262;
   const metricHeight = 40;
   const progressY = metricStart + (metrics.length - 1) * metricHeight + 14;

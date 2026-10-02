@@ -1,7 +1,7 @@
 import { $ } from "./dom.js";
 import { participantCount } from "./calculations.js";
 import { saveState } from "./storage.js";
-import { state } from "./state.js";
+import { createPersonId, state } from "./state.js";
 
 let renderAppCallback;
 let renderSummaryCallback;
@@ -25,6 +25,31 @@ export function syncPersonName(index, value, source) {
   const splitName = $("splitPeopleList").children[index]?.querySelector('input[type="text"]');
   if (mainName && mainName !== source) mainName.value = value;
   if (splitName && splitName !== source) splitName.value = value;
+}
+
+export function removePerson(index) {
+  if (participantCount() === 1) return;
+  const [removedPerson] = state.people.splice(index, 1);
+  state.expenses.forEach((expense) => {
+    if (expense.scope === "selected") {
+      expense.selectedPeople = expense.selectedPeople.filter((personId) => personId !== removedPerson.id);
+    }
+  });
+  saveState();
+  renderAppCallback();
+}
+
+export function createPersonRemoveButton(index) {
+  const person = state.people[index];
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "remove-person-button";
+  button.textContent = "Quitar";
+  button.disabled = participantCount() === 1;
+  button.title = button.disabled ? "Debe haber al menos una persona" : `Quitar ${person.name.trim() || `Persona ${index + 1}`}`;
+  button.setAttribute("aria-label", `Quitar persona ${index + 1}`);
+  button.addEventListener("click", () => removePerson(index));
+  return button;
 }
 
 export function renderContributions() {
@@ -66,19 +91,7 @@ export function renderContributions() {
       saveState();
       renderSummaryCallback();
     });
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.className = "remove-person-button";
-    remove.textContent = "Quitar";
-    remove.disabled = participantCount() === 1;
-    remove.title = remove.disabled ? "Debe haber al menos una persona" : `Quitar ${person.name.trim() || `Persona ${index + 1}`}`;
-    remove.setAttribute("aria-label", `Quitar persona ${index + 1}`);
-    remove.addEventListener("click", () => {
-      if (participantCount() === 1) return;
-      state.people.splice(index, 1);
-      saveState();
-      renderAppCallback();
-    });
+    const remove = createPersonRemoveButton(index);
     row.append(name, contribution, remove);
     list.append(row);
   });
@@ -90,7 +103,7 @@ export function renderContributions() {
 
 function addPerson() {
   if (participantCount() >= 99) return;
-  state.people.push({ name: "", contribution: "", paid: false });
+  state.people.push({ id: createPersonId(), name: "", contribution: "", paid: false });
   saveState();
   renderAppCallback();
   if (!$('budgetView').hidden) $("contributionList").lastElementChild.querySelector("input").focus();

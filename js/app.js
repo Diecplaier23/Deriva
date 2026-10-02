@@ -9,6 +9,7 @@ import { initializeSplit, updateSplitCalculator } from "./split.js";
 import { setState, state } from "./state.js";
 
 setState(loadState(ALL_CATEGORIES));
+$("tripDetails").open = state.expenses.length === 0;
 
 function updateMarginLabels() {
   $("marginRateLabel").textContent = formatSafetyMargin();
@@ -17,7 +18,17 @@ function updateMarginLabels() {
 
 function renderSummary() {
   const summary = getBudgetSummary();
-  const { totals, available, balance, costPerPerson, progress, isBudgetCovered, statusText } = summary;
+  const { totals, available, balance, costPerPerson, personCosts, progress, isBudgetCovered, statusText } = summary;
+  $("summaryCardTitle").textContent = "Resumen del viaje";
+  $("totalBudgetLabel").textContent = "Coste total presupuestado";
+  $("confirmedTotalLabel").textContent = "Gastos confirmados";
+  $("unconfirmedTotalLabel").textContent = "No confirmados, con margen";
+  $("availableTotalLabel").textContent = "Dinero disponible";
+  $("unconfirmedSummaryMetric").hidden = false;
+  $("budgetSafetyNote").hidden = false;
+  $("splitSafetyNote").hidden = true;
+  $("summaryPeopleTitle").textContent = "Coste pendiente por persona y saldo restante";
+  $("budgetProgress").parentElement.setAttribute("aria-label", "Dinero disponible respecto al presupuesto");
   const budgetStatus = $("budgetStatus");
   budgetStatus.hidden = !statusText;
   budgetStatus.classList.toggle("is-covered", isBudgetCovered);
@@ -38,7 +49,7 @@ function renderSummary() {
     const name = document.createElement("span");
     name.textContent = person.name.trim() || `Persona ${index + 1}`;
     const amount = document.createElement("strong");
-    amount.textContent = money.format(costPerPerson);
+    amount.textContent = money.format(personCosts.get(person.id) ?? 0);
     row.append(name, amount);
     peopleSummary.append(row);
   });
@@ -60,11 +71,19 @@ function renderApp() {
   $("destination").value = state.destination;
   $("splitDestination").value = state.destination;
   $("savings").value = state.savings;
+  $("splitSavings").value = state.savings;
   $("safetyMargin").value = state.safetyMargin;
   updateMarginLabels();
   renderContributions();
   renderExpenses();
   renderSummary();
+}
+
+function resetViewData() {
+  resetStoredState();
+  $("splitTotal").value = "";
+  $("tripDetails").open = true;
+  renderApp();
 }
 
 function setCalculationMode(mode) {
@@ -75,23 +94,30 @@ function setCalculationMode(mode) {
 
 function showView(view) {
   const showSplit = view === "split";
-  $("mainIntro").hidden = showSplit;
+  const isSplitViewActive = !$("splitView").hidden;
+  if (isSplitViewActive !== showSplit) resetViewData();
   $("budgetView").hidden = showSplit;
   $("splitView").hidden = !showSplit;
+  $("unconfirmedSummaryMetric").hidden = showSplit;
   $("budgetModeButton").classList.toggle("active", !showSplit);
   $("budgetModeButton").setAttribute("aria-pressed", String(!showSplit));
   $("splitModeButton").classList.toggle("active", showSplit);
   $("splitModeButton").setAttribute("aria-pressed", String(showSplit));
-  if (showSplit) $("splitTotal").focus();
+  if (showSplit) {
+    updateSplitCalculator();
+    $("splitTotal").focus();
+  } else {
+    renderSummary();
+  }
 }
 
 function resetAll() {
   $("resetDialog").close();
-  resetStoredState();
-  $("splitTotal").value = "";
-  renderApp();
-  updateSplitCalculator();
-  showView("budget");
+  if (!$("splitView").hidden) {
+    showView("budget");
+    return;
+  }
+  resetViewData();
 }
 
 initializePeople({ renderApp, renderSummary });
@@ -111,6 +137,13 @@ $("splitDestination").addEventListener("input", (event) => {
 });
 $("savings").addEventListener("input", (event) => {
   state.savings = event.target.value;
+  $("splitSavings").value = state.savings;
+  saveState();
+  renderSummary();
+});
+$("splitSavings").addEventListener("input", (event) => {
+  state.savings = event.target.value;
+  $("savings").value = state.savings;
   saveState();
   renderSummary();
 });

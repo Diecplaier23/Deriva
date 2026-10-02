@@ -1,6 +1,6 @@
 import { $ } from "./dom.js";
 import { ALL_CATEGORIES, CATEGORIES } from "./categories.js";
-import { money, formatSafetyMargin, getExpenseMath, participantCount } from "./calculations.js";
+import { money, formatSafetyMargin, getExpenseMath } from "./calculations.js";
 import { saveState } from "./storage.js";
 import { state } from "./state.js";
 
@@ -13,6 +13,9 @@ export function initializeExpenses({ renderApp }) {
   $("addExpenseButton").addEventListener("click", () => openExpenseDialog());
   $("closeExpenseDialog").addEventListener("click", () => $("expenseDialog").close());
   $("cancelExpense").addEventListener("click", () => $("expenseDialog").close());
+  $("expenseConfirmed").addEventListener("click", () => {
+    setExpenseConfirmed($("expenseConfirmed").getAttribute("aria-pressed") !== "true");
+  });
   $("changeCategory").addEventListener("click", () => {
     selectedCategory = null;
     $("expenseFields").hidden = true;
@@ -21,7 +24,39 @@ export function initializeExpenses({ renderApp }) {
     renderCategories();
     $("categoryGroups").querySelector(".category-option")?.focus();
   });
+  $("scopeFieldset").addEventListener("change", updateExpenseParticipantsVisibility);
   $("expenseForm").addEventListener("submit", saveExpenseFromForm);
+}
+
+function renderExpenseParticipants(selectedPeople = []) {
+  const list = $("expenseParticipantsList");
+  list.replaceChildren();
+  state.people.forEach((person, index) => {
+    const option = document.createElement("label");
+    option.className = "expense-participant-option";
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "expenseParticipant";
+    checkbox.value = person.id;
+    checkbox.checked = selectedPeople.includes(person.id);
+    const name = document.createElement("span");
+    name.textContent = person.name.trim() || `Persona ${index + 1}`;
+    option.append(checkbox, name);
+    list.append(option);
+  });
+}
+
+function updateExpenseParticipantsVisibility() {
+  const isSelectedScope = document.querySelector('input[name="expenseScope"]:checked')?.value === "selected";
+  $("expenseParticipants").hidden = !isSelectedScope;
+}
+
+function setExpenseConfirmed(confirmed) {
+  const button = $("expenseConfirmed");
+  button.classList.toggle("is-confirmed", confirmed);
+  button.classList.toggle("is-pending", !confirmed);
+  button.setAttribute("aria-pressed", String(confirmed));
+  button.textContent = confirmed ? "✓ Confirmado" : "✕ No confirmado";
 }
 
 function createExpenseElement(expense) {
@@ -47,15 +82,17 @@ function createExpenseElement(expense) {
   const scope = document.createElement("p");
   scope.className = "expense-scope";
   scope.textContent = expense.scope === "person"
-    ? `${money.format(expense.price)} por persona · ${money.format(math.enteredTotal)} para ${participantCount()}`
-    : "Todo el grupo";
+    ? `${money.format(expense.price)} por persona · ${money.format(math.enteredTotal)} para ${math.affectedPeople}`
+    : expense.scope === "selected"
+      ? `Solo para ${math.affectedPeople} ${math.affectedPeople === 1 ? "persona" : "personas"}`
+      : "Todo el grupo";
   main.append(scope);
 
   const amount = document.createElement("div");
   amount.className = "expense-math";
   const entered = document.createElement("span");
   entered.className = "expense-entered";
-  entered.textContent = expense.scope === "person" ? `${money.format(expense.price)} / persona` : `${money.format(math.enteredTotal)} introducidos`;
+  entered.textContent = expense.scope !== "group" ? `${money.format(expense.price)} / persona` : `${money.format(math.enteredTotal)} introducidos`;
   amount.append(entered);
   if (!expense.confirmed) {
     const margin = document.createElement("span");
@@ -68,7 +105,9 @@ function createExpenseElement(expense) {
   budgeted.textContent = `${money.format(math.budgeted)} presupuestados`;
   const perPerson = document.createElement("span");
   perPerson.className = "expense-per-person";
-  perPerson.textContent = `${money.format(math.budgeted / participantCount())} / persona`;
+  perPerson.textContent = math.affectedPeople
+    ? `${money.format(math.budgeted / math.affectedPeople)} / persona`
+    : "Sin personas seleccionadas";
   amount.append(budgeted, perPerson);
 
   const actions = document.createElement("div");
@@ -94,6 +133,7 @@ function createExpenseElement(expense) {
   remove.setAttribute("aria-label", `Eliminar ${type}`);
   remove.addEventListener("click", () => {
     state.expenses = state.expenses.filter((item) => item.id !== expense.id);
+    if (!state.expenses.length) $("tripDetails").open = true;
     saveState();
     renderAppCallback();
   });
@@ -140,6 +180,7 @@ function renderCategories() {
   const groups = $("categoryGroups");
   groups.replaceChildren();
   const selectedDefinition = ALL_CATEGORIES.find((category) => category.name === selectedCategory);
+  groups.hidden = Boolean(selectedDefinition);
   const selectedArea = $("selectedCategoryArea");
   selectedArea.hidden = !selectedDefinition;
   if (selectedDefinition) {
@@ -195,6 +236,7 @@ function openExpenseDialog(expense = null) {
   editingExpenseId = expense ? expense.id : null;
   selectedCategory = expense ? expense.type || expense.category : null;
   $("expenseForm").reset();
+  setExpenseConfirmed(Boolean(expense?.confirmed));
   $("dialogTitle").textContent = expense ? `Editar ${expense.type || expense.category}` : "¿Qué gasto quieres añadir?";
   $("expenseFields").hidden = !expense;
   $("saveExpense").hidden = !expense;
@@ -203,9 +245,10 @@ function openExpenseDialog(expense = null) {
   if (expense) {
     $("expenseDescription").value = expense.description;
     $("expensePrice").value = expense.price;
-    $("expenseConfirmed").checked = expense.confirmed;
     document.querySelector(`input[name="expenseScope"][value="${expense.scope}"]`).checked = true;
   }
+  renderExpenseParticipants(expense?.selectedPeople || []);
+  updateExpenseParticipantsVisibility();
   $("expenseDialog").showModal();
   if (!expense) $("categoryGroups").querySelector(".category-option")?.focus();
 }
@@ -218,6 +261,15 @@ function saveExpenseFromForm(event) {
     $("dialogError").hidden = false;
     return;
   }
+  const scope = document.querySelector('input[name="expenseScope"]:checked').value;
+  const selectedPeople = scope === "selected"
+    ? Array.from(document.querySelectorAll('input[name="expenseParticipant"]:checked'), (checkbox) => checkbox.value)
+    : [];
+  if (scope === "selected" && !selectedPeople.length) {
+    $("dialogError").textContent = "Selecciona al menos una persona para este gasto.";
+    $("dialogError").hidden = false;
+    return;
+  }
   const category = ALL_CATEGORIES.find((item) => item.name === selectedCategory);
   if (!category) return;
   const expense = {
@@ -226,14 +278,17 @@ function saveExpenseFromForm(event) {
     type: category.name,
     description: $("expenseDescription").value.trim(),
     price,
-    scope: document.querySelector('input[name="expenseScope"]:checked').value,
-    confirmed: $("expenseConfirmed").checked
+    scope,
+    selectedPeople,
+    confirmed: $("expenseConfirmed").getAttribute("aria-pressed") === "true"
   };
+  const isFirstExpense = !editingExpenseId && state.expenses.length === 0;
   if (editingExpenseId) {
     state.expenses = state.expenses.map((item) => item.id === editingExpenseId ? expense : item);
   } else {
     state.expenses.push(expense);
   }
+  if (isFirstExpense) $("tripDetails").open = false;
   saveState();
   $("expenseDialog").close();
   renderAppCallback();

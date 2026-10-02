@@ -1,10 +1,14 @@
+export function createPersonId() {
+  return `person-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export function createInitialState() {
   return {
     destination: "",
     savings: "",
     safetyMargin: 10,
     calculationMode: "automatic",
-    people: [{ name: "", contribution: "", paid: false }],
+    people: [{ id: createPersonId(), name: "", contribution: "", paid: false }],
     expenses: []
   };
 }
