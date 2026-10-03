@@ -1,4 +1,5 @@
 import { $ } from "./dom.js";
+import { state } from "./state.js";
 
 export function initializeDownload() {
   $("downloadSummaryButton").addEventListener("click", downloadSummaryImage);
@@ -8,7 +9,7 @@ async function downloadSummaryImage() {
   const width = 960;
   const scale = 2;
   const padding = 46;
-  const capturedAt = new Intl.DateTimeFormat("es-ES", { dateStyle: "medium", timeStyle: "short" }).format(new Date());
+  const capturedAt = new Intl.DateTimeFormat(state.language === "en" ? "en-GB" : "es-ES", { dateStyle: "medium", timeStyle: "short" }).format(new Date());
   const metrics = Array.from(document.querySelectorAll(".summary-card .summary-metric:not([hidden])"), (row) => ({
     label: row.querySelector("span").textContent.trim(),
     value: row.querySelector("strong").textContent.trim()

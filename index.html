@@ -16,6 +16,23 @@
     </a>
     <div class="topbar-actions">
       <div class="topbar-note"><span aria-hidden="true"></span> Tu viaje, bajo tu control</div>
+      <div class="preference-menu" id="languageMenu" data-value="es">
+        <span class="preference-label" id="languageLabel">Idioma</span>
+        <button class="preference-trigger" id="languageTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="languageOptions" aria-labelledby="languageLabel languageCurrent"><span class="preference-current" id="languageCurrent">Español</span><span class="preference-chevron" aria-hidden="true"></span></button>
+        <div class="preference-options" id="languageOptions" role="listbox" aria-labelledby="languageLabel" hidden>
+          <button class="preference-option" type="button" role="option" data-value="es" aria-selected="true" tabindex="0">Español</button>
+          <button class="preference-option" type="button" role="option" data-value="en" aria-selected="false" tabindex="-1">English</button>
+        </div>
+      </div>
+      <div class="preference-menu" id="currencyMenu" data-value="EUR">
+        <span class="preference-label" id="currencyLabel">Moneda</span>
+        <button class="preference-trigger" id="currencyTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="currencyOptions" aria-labelledby="currencyLabel currencyCurrent"><span class="preference-current" id="currencyCurrent">€ EUR</span><span class="preference-chevron" aria-hidden="true"></span></button>
+        <div class="preference-options" id="currencyOptions" role="listbox" aria-labelledby="currencyLabel" hidden>
+          <button class="preference-option" type="button" role="option" data-value="EUR" aria-selected="true" tabindex="0">€ EUR</button>
+          <button class="preference-option" type="button" role="option" data-value="USD" aria-selected="false" tabindex="-1">$ USD</button>
+          <button class="preference-option" type="button" role="option" data-value="GBP" aria-selected="false" tabindex="-1">£ GBP</button>
+        </div>
+      </div>
       <button class="reset-button" id="resetAllButton" type="button">Reiniciar todo</button>
     </div>
   </header>

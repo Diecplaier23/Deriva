@@ -3,6 +3,7 @@ import { ALL_CATEGORIES, CATEGORIES } from "./categories.js";
 import { money, formatSafetyMargin, getExpenseMath } from "./calculations.js";
 import { saveState } from "./storage.js";
 import { state } from "./state.js";
+import { applyTranslations } from "./i18n.js";
 
 let renderAppCallback;
 let editingExpenseId = null;
@@ -15,6 +16,7 @@ export function initializeExpenses({ renderApp }) {
   $("cancelExpense").addEventListener("click", () => $("expenseDialog").close());
   $("expenseConfirmed").addEventListener("click", () => {
     setExpenseConfirmed($("expenseConfirmed").getAttribute("aria-pressed") !== "true");
+    applyTranslations();
   });
   $("changeCategory").addEventListener("click", () => {
     selectedCategory = null;
@@ -23,6 +25,7 @@ export function initializeExpenses({ renderApp }) {
     $("dialogError").hidden = true;
     renderCategories();
     $("categoryGroups").querySelector(".category-option")?.focus();
+    applyTranslations();
   });
   $("scopeFieldset").addEventListener("change", updateExpenseParticipantsVisibility);
   $("expenseForm").addEventListener("submit", saveExpenseFromForm);
@@ -152,6 +155,7 @@ export function renderExpenses() {
     title.textContent = "Tu lista empieza aquí";
     empty.append(title, document.createTextNode("Añade los gastos que ya conoces. Puedes completar el resto más adelante."));
     list.append(empty);
+    applyTranslations();
     return;
   }
   const groups = new Map();
@@ -174,6 +178,7 @@ export function renderExpenses() {
     container.append(section);
   });
   list.append(container);
+  applyTranslations();
 }
 
 function renderCategories() {
@@ -221,6 +226,7 @@ function renderCategories() {
     section.append(heading, options);
     groups.append(section);
   });
+  applyTranslations();
 }
 
 function selectCategory(category) {
@@ -250,6 +256,7 @@ function openExpenseDialog(expense = null) {
   renderExpenseParticipants(expense?.selectedPeople || []);
   updateExpenseParticipantsVisibility();
   $("expenseDialog").showModal();
+  applyTranslations();
   if (!expense) $("categoryGroups").querySelector(".category-option")?.focus();
 }
 
@@ -259,6 +266,7 @@ function saveExpenseFromForm(event) {
   if (!selectedCategory || !Number.isFinite(price) || price < 0) {
     $("dialogError").textContent = "Introduce un precio válido para guardar el gasto.";
     $("dialogError").hidden = false;
+    applyTranslations();
     return;
   }
   const scope = document.querySelector('input[name="expenseScope"]:checked').value;
@@ -268,6 +276,7 @@ function saveExpenseFromForm(event) {
   if (scope === "selected" && !selectedPeople.length) {
     $("dialogError").textContent = "Selecciona al menos una persona para este gasto.";
     $("dialogError").hidden = false;
+    applyTranslations();
     return;
   }
   const category = ALL_CATEGORIES.find((item) => item.name === selectedCategory);

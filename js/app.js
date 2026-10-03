@@ -1,9 +1,11 @@
 import { $ } from "./dom.js";
 import { ALL_CATEGORIES } from "./categories.js";
-import { formatSafetyMargin, getBudgetSummary, getContributions, money } from "./calculations.js";
+import { formatSafetyMargin, getBudgetSummary, getContributions, money, setCurrency } from "./calculations.js";
 import { initializeDownload } from "./download.js";
 import { initializeExpenses, renderExpenses } from "./expenses.js";
 import { initializePeople, renderContributions } from "./people.js";
+import { applyTranslations } from "./i18n.js";
+import { initializePreferenceMenu } from "./preference-menu.js";
 import { resetStoredState, loadState, saveState } from "./storage.js";
 import { initializeSplit, updateSplitCalculator } from "./split.js";
 import { setState, state } from "./state.js";
@@ -65,14 +67,19 @@ function renderSummary() {
     ? `${money.format(costPerPerson)} por persona`
     : money.format(getContributions());
   updateSplitCalculator();
+  applyTranslations();
 }
 
 function renderApp() {
+  setCurrency(state.currency);
+  setLanguageMenuValue(state.language);
+  setCurrencyMenuValue(state.currency);
   $("destination").value = state.destination;
   $("splitDestination").value = state.destination;
   $("savings").value = state.savings;
   $("splitSavings").value = state.savings;
   $("safetyMargin").value = state.safetyMargin;
+  $("expensePrice").placeholder = state.currency === "EUR" ? "0,00 €" : state.currency === "GBP" ? "£0.00" : "$0.00";
   updateMarginLabels();
   renderContributions();
   renderExpenses();
@@ -80,7 +87,11 @@ function renderApp() {
 }
 
 function resetViewData() {
+  const { currency, language } = state;
   resetStoredState();
+  state.currency = currency;
+  state.language = language;
+  saveState();
   $("splitTotal").value = "";
   $("tripDetails").open = true;
   renderApp();
@@ -124,6 +135,17 @@ initializePeople({ renderApp, renderSummary });
 initializeExpenses({ renderApp });
 initializeSplit({ renderApp });
 initializeDownload();
+const setLanguageMenuValue = initializePreferenceMenu("languageMenu", (language) => {
+  state.language = language === "en" ? "en" : "es";
+  state.currency = state.language === "en" ? "USD" : "EUR";
+  saveState();
+  renderApp();
+});
+const setCurrencyMenuValue = initializePreferenceMenu("currencyMenu", (currency) => {
+  state.currency = ["USD", "GBP"].includes(currency) ? currency : "EUR";
+  saveState();
+  renderApp();
+});
 
 $("destination").addEventListener("input", (event) => {
   state.destination = event.target.value;

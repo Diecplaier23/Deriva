@@ -1,13 +1,28 @@
 import { state } from "./state.js";
+import { translateText } from "./i18n.js";
 
-export const money = new Intl.NumberFormat("es-ES", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 2
-});
+function createMoneyFormatter(currency) {
+  const locale = currency === "USD" ? "en-US" : state.language === "en" || currency === "GBP" ? "en-GB" : "es-ES";
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2
+  });
+}
+
+export let money = createMoneyFormatter(state.currency);
+
+export function setCurrency(currency) {
+  money = createMoneyFormatter(["USD", "GBP"].includes(currency) ? currency : "EUR");
+}
+
+export function setMoneyLocale() {
+  money = createMoneyFormatter(state.currency);
+}
 
 export function formatSafetyMargin() {
-  return `${new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(state.safetyMargin)} %`;
+  const locale = state.language === "en" ? "en-GB" : "es-ES";
+  return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(state.safetyMargin)} %`;
 }
 
 export function participantCount() {
@@ -61,7 +76,7 @@ export function getBudgetSummary() {
   const statusText = totals.total > 0
     ? isBudgetCovered
       ? state.calculationMode === "manual" ? "Presupuesto bajo control" : ""
-      : `Falta por aportar ${money.format(difference)}`
+      : translateText("Falta por aportar {amount}").replace("{amount}", money.format(difference))
     : "";
   return {
     totals,

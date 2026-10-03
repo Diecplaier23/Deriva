@@ -2,6 +2,7 @@ import { $ } from "./dom.js";
 import { participantCount } from "./calculations.js";
 import { saveState } from "./storage.js";
 import { createPersonId, state } from "./state.js";
+import { applyTranslations, translateText } from "./i18n.js";
 
 let renderAppCallback;
 let renderSummaryCallback;
@@ -18,7 +19,7 @@ export function syncPersonName(index, value, source) {
   if (!person) return;
   person.name = value;
   saveState();
-  const displayName = value.trim() || `Persona ${index + 1}`;
+  const displayName = value.trim() || translateText(`Persona ${index + 1}`);
   const summaryName = $("summaryPeople").children[index]?.querySelector("span");
   if (summaryName) summaryName.textContent = displayName;
   const mainName = $("contributionList").children[index]?.querySelector('input[type="text"]');
@@ -67,6 +68,8 @@ export function renderContributions() {
   $("contributionHelper").textContent = isAutomatic
     ? "El presupuesto total se divide a partes iguales entre todas las personas."
     : "Los ahorros y las aportaciones individuales se suman al dinero disponible.";
+  const currencySymbol = state.currency === "USD" ? "$" : state.currency === "GBP" ? "£" : "€";
+  const currencyName = state.currency === "USD" ? "dólares" : state.currency === "GBP" ? "libras" : "euros";
   state.people.forEach((person, index) => {
     const row = document.createElement("div");
     row.className = isAutomatic ? "contribution-row people-row" : "contribution-row";
@@ -84,8 +87,8 @@ export function renderContributions() {
     contribution.inputMode = "decimal";
     contribution.value = person.contribution;
     contribution.hidden = isAutomatic;
-    contribution.placeholder = "Aportación (€)";
-    contribution.setAttribute("aria-label", `Aportación de la persona ${index + 1} en euros`);
+    contribution.placeholder = `Aportación (${currencySymbol})`;
+    contribution.setAttribute("aria-label", `Aportación de la persona ${index + 1} en ${currencyName}`);
     contribution.addEventListener("input", () => {
       person.contribution = contribution.value;
       saveState();
@@ -99,6 +102,7 @@ export function renderContributions() {
   $("peopleCountLabel").textContent = `${count} ${count === 1 ? "persona" : "personas"}`;
   $("addPersonButton").disabled = count >= 99;
   $("splitAddPersonButton").disabled = count >= 99;
+  applyTranslations();
 }
 
 function addPerson() {

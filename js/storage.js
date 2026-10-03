@@ -32,6 +32,8 @@ export function loadState(categories) {
     return {
       destination: typeof saved.destination === "string" ? saved.destination.slice(0, 80) : "",
       savings: Number.isFinite(Number(saved.savings)) && Number(saved.savings) >= 0 ? String(saved.savings) : "",
+      currency: ["USD", "GBP"].includes(saved.currency) ? saved.currency : "EUR",
+      language: saved.language === "en" ? "en" : "es",
       safetyMargin: Number.isFinite(safetyMargin) && safetyMargin >= 0 && safetyMargin <= 100 ? safetyMargin : 10,
       calculationMode: saved.calculationMode === "manual" ? "manual" : "automatic",
       people: people.length ? people : [{ name: "", contribution: "" }],

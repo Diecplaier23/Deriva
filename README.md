@@ -1,6 +1,6 @@
 # Deriva
 
-Deriva es una página web sencilla para organizar el presupuesto de un viaje. Permite registrar gastos y viajeros, comparar el presupuesto con el dinero disponible y calcular el coste estimado por persona. La interfaz está en español y utiliza euros.
+Deriva es una página web sencilla para organizar el presupuesto de un viaje. Permite registrar gastos y viajeros, comparar el presupuesto con el dinero disponible y calcular el coste estimado por persona. La interfaz se puede usar en español o inglés, con importes en euros, dólares estadounidenses o libras esterlinas.
 
 ## Cómo abrirla
 
@@ -14,12 +14,20 @@ py -m http.server 8000
 
 Después abre `http://localhost:8000/`. También se puede publicar directamente en GitHub Pages.
 
+## Idioma y moneda
+
+Los menús de la cabecera permiten elegir Español o English y EUR, USD o GBP. Al cambiar el idioma, la moneda se ajusta automáticamente: Español selecciona EUR y English selecciona USD. La moneda también se puede cambiar manualmente, por ejemplo para usar GBP. Cambiar de moneda modifica el formato de los importes, pero no realiza conversiones de tipo de cambio.
+
+El idioma y la moneda seleccionados se guardan en el navegador junto con los datos del viaje. «Reiniciar todo» borra los datos del viaje, pero conserva ambas preferencias.
+
 ## Organización
 
 - `index.html`: estructura de la interfaz.
 - `css/styles.css`: estilos.
 - `js/app.js`: inicialización, coordinación y renderizado del resumen.
-- `js/state.js` y `js/storage.js`: estado del viaje y persistencia.
+- `js/state.js` y `js/storage.js`: estado del viaje, preferencias y persistencia.
+- `js/i18n.js`: traducciones de la interfaz.
+- `js/preference-menu.js`: menús personalizados y accesibles para idioma y moneda.
 - `js/calculations.js`: cálculos y formato de importes.
 - `js/people.js`, `js/expenses.js` y `js/split.js`: gestión de viajeros, gastos y reparto.
 - `js/download.js`: generación del resumen PNG.
@@ -67,6 +75,6 @@ La sección **¿Ya conoces el coste?** sirve para dividir un importe total a par
 
 ## Guardado y privacidad
 
-Los datos del viaje se guardan automáticamente en el almacenamiento local del navegador (`localStorage`). Permanecen en ese navegador y perfil; no se sincronizan con otros dispositivos ni se envían a un servidor. El botón **Reiniciar todo** pide confirmación y elimina el destino, los ahorros, el margen configurado, las personas, las aportaciones y los gastos guardados.
+Los datos del viaje y las preferencias de idioma y moneda se guardan automáticamente en el almacenamiento local del navegador (`localStorage`). Permanecen en ese navegador y perfil; no se sincronizan con otros dispositivos ni se envían a un servidor. El botón **Reiniciar todo** pide confirmación y elimina el destino, los ahorros, el margen configurado, las personas, las aportaciones y los gastos, pero conserva el idioma y la moneda seleccionados.
 
-Deriva no requiere una cuenta ni conexión a un servicio externo para realizar sus cálculos. Si se borra el almacenamiento del navegador, también se borrarán los datos guardados de la aplicación. Cambiar entre «Mi viaje» y «¿Ya conoces el coste?» reinicia ambas vistas y elimina los datos guardados para evitar mezclar sus importes.
+Deriva no requiere una cuenta ni conexión a un servicio externo para realizar sus cálculos. Si se borra el almacenamiento del navegador, también se borrarán los datos y preferencias guardados de la aplicación. Cambiar entre «Mi viaje» y «¿Ya conoces el coste?» reinicia los datos del viaje para evitar mezclar sus importes, pero conserva el idioma y la moneda.

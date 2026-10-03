@@ -75,6 +75,20 @@
     }
 
     .topbar-actions { display: flex; align-items: center; gap: 14px; }
+    .preference-menu { position: relative; display: grid; min-width: 108px; gap: 4px; }
+    .preference-label { padding-left: 2px; color: var(--muted); font-size: 10px; font-weight: 600; }
+    .preference-trigger { display: flex; width: 100%; min-height: 36px; align-items: center; justify-content: space-between; gap: 12px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); font-size: 12px; font-weight: 650; text-align: left; transition: background-color .16s ease, border-color .16s ease, box-shadow .16s ease; }
+    .preference-trigger:hover, .preference-menu.is-open .preference-trigger { border-color: #cbd8ce; background: #f7faf7; }
+    .preference-trigger:focus-visible { outline: 0; border-color: var(--green); box-shadow: 0 0 0 3px rgba(23, 107, 86, .14); }
+    .preference-chevron { width: 7px; height: 7px; flex: 0 0 auto; transform: translateY(-2px) rotate(45deg); border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transition: transform .16s ease; }
+    .preference-menu.is-open .preference-chevron { transform: translateY(2px) rotate(225deg); }
+    .preference-options { position: absolute; z-index: 30; top: calc(100% + 7px); left: 0; display: grid; min-width: 100%; gap: 2px; padding: 5px; border: 1px solid #e3eae4; border-radius: 10px; background: var(--paper); box-shadow: 0 12px 28px rgba(24, 59, 53, .14); transform-origin: top left; animation: preference-menu-enter .14s ease-out; }
+    .preference-options[hidden] { display: none; }
+    .preference-option { display: flex; min-height: 34px; align-items: center; justify-content: space-between; gap: 20px; padding: 0 9px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); font-size: 12px; text-align: left; white-space: nowrap; }
+    .preference-option:hover, .preference-option:focus-visible { outline: 0; background: #f2f7f3; }
+    .preference-option[aria-selected="true"] { background: var(--mint); color: var(--green-dark); font-weight: 700; }
+    .preference-option[aria-selected="true"]::after { color: var(--green); content: "✓"; }
+    @keyframes preference-menu-enter { from { opacity: 0; transform: translateY(-3px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .reset-button { min-height: 36px; padding: 0 11px; border: 1px solid #e7c7be; border-radius: 9px; background: #fff8f6; color: #a44332; font-size: 11px; font-weight: 750; white-space: nowrap; }
     .reset-button:hover { border-color: #d99d8f; background: #fff0ec; }
 
@@ -259,10 +273,13 @@
     }
 
     @media (max-width: 560px) {
-      .topbar { height: 64px; padding: 0 4vw; }
+      .topbar { height: auto; min-height: 64px; flex-wrap: wrap; gap: 8px; padding: 10px 4vw; }
       .topbar-note { display: none; }
-      .topbar-actions { gap: 0; }
-      .reset-button { min-height: 34px; padding: 0 9px; }
+      .topbar-actions { width: 100%; justify-content: flex-end; gap: 6px; }
+      .preference-label { display: none; }
+      .preference-menu { min-width: 98px; }
+      .preference-trigger { min-height: 34px; padding: 0 8px; font-size: 11px; }
+      .reset-button { min-height: 34px; padding: 0 7px; font-size: 10px; }
       main { width: 92vw; padding: 28px 0 24px; }
       .site-footer-inner { width: 92vw; padding: 20px 0 12px; }
       .site-footer-main { gap: 16px 14px; }
@@ -282,6 +299,19 @@
       .calculation-mode { width: 100%; }
       .calculation-mode button { flex: 1; padding: 0 7px; font-size: 10px; }
     }
+
+    @media (max-width: 400px) {
+      .topbar-actions { justify-content: space-between; }
+      .preference-menu { min-width: 0; flex: 1 1 0; }
+      .preference-trigger { min-width: 0; }
+    }
+
+    @media (max-width: 360px) {
+      .topbar-actions { gap: 4px; }
+      .preference-trigger { padding: 0 6px; }
+      .reset-button { padding: 0 5px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .preference-options { animation: none; } }
 
     .trip-fields { grid-template-columns: minmax(0, 1fr); margin-bottom: 20px; }
     .savings-helper { margin-top: 6px; }

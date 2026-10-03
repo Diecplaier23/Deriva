@@ -6,6 +6,8 @@ export function createInitialState() {
   return {
     destination: "",
     savings: "",
+    currency: "EUR",
+    language: "es",
     safetyMargin: 10,
     calculationMode: "automatic",
     people: [{ id: createPersonId(), name: "", contribution: "", paid: false }],

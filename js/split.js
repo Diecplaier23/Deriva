@@ -3,6 +3,7 @@ import { getBudgetSummary, getRemainingCost, money, participantCount } from "./c
 import { createPersonRemoveButton, syncPersonName } from "./people.js";
 import { saveState } from "./storage.js";
 import { state } from "./state.js";
+import { applyTranslations } from "./i18n.js";
 
 let renderAppCallback;
 
@@ -20,6 +21,7 @@ export function updateSplitCalculator() {
   $("splitPerPerson").textContent = money.format(getRemainingCost(totalAmount, remainingFunds) / participantCount());
   renderSplitPeople(total, remainingFunds);
   renderSplitSummary(total, remainingFunds);
+  applyTranslations();
 }
 
 function renderSplitSummary(total, remainingFunds) {
@@ -69,6 +71,7 @@ function renderSplitSummary(total, remainingFunds) {
     row.append(name, amount);
     peopleSummary.append(row);
   });
+  applyTranslations();
 }
 
 function renderSplitPeople(total = $("splitTotal").value, remainingFunds = Math.max(0, getBudgetSummary().balance)) {
@@ -103,6 +106,7 @@ function renderSplitPeople(total = $("splitTotal").value, remainingFunds = Math.
       paidButton.textContent = person.paid ? "✓ Pagado" : "Pagado";
       paidButton.setAttribute("aria-pressed", String(person.paid));
       renderSplitSummary(total, remainingFunds);
+      applyTranslations();
     });
     const amount = document.createElement("strong");
     amount.textContent = perPerson;
