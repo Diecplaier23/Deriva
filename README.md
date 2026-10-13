@@ -2,6 +2,8 @@
 # Deriva
 
 Deriva es una página web sencilla para organizar el presupuesto de un viaje. Permite registrar gastos y viajeros, comparar el presupuesto con el dinero disponible y calcular el coste estimado por persona. La interfaz se puede usar en español o inglés, con importes en euros, dólares estadounidenses o libras esterlinas.
+Link por si no la conoces
+https://diecplaier23.github.io/Deriva/
 
 ## Cómo abrirla
 
